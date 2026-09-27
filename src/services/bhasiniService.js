@@ -1,7 +1,9 @@
 // कृषिवाणी (KrishiVaani) - वाक् सहायक व भाषिणी (Speech Recognition & TTS Engine)
 // Browser Web Speech API (webkitSpeechRecognition) + SpeechSynthesis with 'hi-IN'
+// All voice responses are generated dynamically from today's live crop timeline
 
-import { BHASHINI_VOICE_QUERIES, CROPS } from '../data/mandiData';
+import { getBhasiniVoiceQueries, CROPS } from '../data/mandiData';
+import { getCropDynamicTimeline } from '../utils/dateUtils';
 
 class BhasiniVoiceService {
   constructor() {
@@ -36,11 +38,10 @@ class BhasiniVoiceService {
    */
   async requestMicPermission() {
     if (typeof window === 'undefined' || !navigator.mediaDevices?.getUserMedia) {
-      return { ok: true }; // Fallback to SpeechRecognition prompt
+      return { ok: true };
     }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Stop tracks immediately so Web Speech API has exclusive audio device control
       stream.getTracks().forEach(track => track.stop());
       return { ok: true };
     } catch (err) {
@@ -65,7 +66,6 @@ class BhasiniVoiceService {
   async startListening({ onResult, onError, onInterim, onEnd }) {
     if (typeof window === 'undefined') return;
 
-    // Stop any existing session
     this.stopListening();
     this.stopSpeaking();
     this.lastErrorCode = null;
@@ -82,7 +82,6 @@ class BhasiniVoiceService {
       return;
     }
 
-    // Step 1: Explicitly check mic permission
     const perm = await this.requestMicPermission();
     if (!perm.ok) {
       this.lastErrorCode = perm.errorCode;
@@ -96,10 +95,9 @@ class BhasiniVoiceService {
       return;
     }
 
-    // Step 2: Fresh SpeechRecognition instance
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = 'hi-IN'; // Default Hindi
+      recognition.lang = 'hi-IN';
       recognition.continuous = false;
       recognition.interimResults = true;
       recognition.maxAlternatives = 1;
@@ -186,7 +184,6 @@ class BhasiniVoiceService {
         this.isListening = false;
         this.activeRecognition = null;
         
-        // Notify end only if no error occurred
         if (!hasError) {
           this.notify({ 
             type: 'listening_end', 
@@ -213,7 +210,7 @@ class BhasiniVoiceService {
       try {
         this.activeRecognition.stop();
       } catch (e) {
-        // ignore already stopped
+        // ignore
       }
       this.activeRecognition = null;
     }
@@ -283,14 +280,14 @@ class BhasiniVoiceService {
   }
 
   /**
-   * Process a Hindi query and return advice + response
+   * Process a Hindi query dynamically - all advice matches current date & card metrics
    */
   processHindiQuery(query) {
     if (!query) return null;
     const qLower = query.toLowerCase().trim();
 
-    // Check pre-configured questions first
-    const preset = BHASHINI_VOICE_QUERIES.find(p => 
+    const presets = getBhasiniVoiceQueries();
+    const preset = presets.find(p => 
       qLower.includes(p.queryText.toLowerCase().substring(0, 8)) ||
       p.queryText.toLowerCase().includes(qLower)
     );
@@ -303,38 +300,42 @@ class BhasiniVoiceService {
       };
     }
 
-    // Keyword based agricultural reasoning
+    // Dynamic crop-based reasoning
     if (qLower.includes('प्याज') || qLower.includes('onion')) {
+      const timeline = getCropDynamicTimeline(CROPS[0]);
       return {
         query,
-        reply: 'किसान भाई, प्याज के लिए हमारा सुझाव है कि आप 5 दिन रुकें। 29 अगस्त को उमराने मंडी में भाव ₹2,788 तक पहुंचने का अनुमान है, जिससे आपको ₹184 प्रति क्विंटल अधिक शुद्ध मुनाफा मिलेगा।',
+        reply: timeline.spokenAdvice,
         badge: 'प्याज सलाह',
         actionLink: '/app/crop/onion'
       };
     }
 
     if (qLower.includes('टमाटर') || qLower.includes('tomato')) {
+      const timeline = getCropDynamicTimeline(CROPS[1]);
       return {
         query,
-        reply: 'टमाटर के लिए तुरंत आज ही चांदवड़ मंडी जाएं। स्थानीय यार्ड के बजाय चांदवड़ में ₹202 प्रति क्विंटल अधिक मिल रहे हैं। रुकने पर फसल गलने का नुकसान हो सकता है।',
+        reply: timeline.spokenAdvice,
         badge: 'टमाटर बिक्री',
         actionLink: '/app/crop/tomato'
       };
     }
 
     if (qLower.includes('गेहूं') || qLower.includes('गेहूँ') || qLower.includes('wheat')) {
+      const timeline = getCropDynamicTimeline(CROPS[2]);
       return {
         query,
-        reply: 'गेहूँ को अभी सूखे गोदाम में संभाल कर रखें। डबरा मंडी में रोलर फ्लोर मिलों की मांग से अगले 8 दिनों में भाव ₹2,780 तक पहुंचेंगे, जिससे प्रति क्विंटल ₹165 का लाभ होगा।',
+        reply: timeline.spokenAdvice,
         badge: 'गेहूँ सलाह',
         actionLink: '/app/crop/wheat'
       };
     }
 
     if (qLower.includes('सरसों') || qLower.includes('mustard')) {
+      const timeline = getCropDynamicTimeline(CROPS[3]);
       return {
         query,
-        reply: 'सरसों की बिक्री के लिए मुरैना मंडी सर्वोत्तम है। 3 दिन में स्थानीय स्तर पर बेचने से परिवहन खर्च कम होगा और शुद्ध भाव ₹5,580 तक मिलेगा।',
+        reply: timeline.spokenAdvice,
         badge: 'सरसों सलाह',
         actionLink: '/app/crop/mustard'
       };

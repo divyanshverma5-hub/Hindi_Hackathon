@@ -10,7 +10,8 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { bhasiniService } from '../services/bhasiniService';
-import { BHASHINI_VOICE_QUERIES } from '../data/mandiData';
+import { BHASHINI_VOICE_QUERIES, CROPS } from '../data/mandiData';
+import { getCropDynamicTimeline } from '../utils/dateUtils';
 
 export default function VoicePage({ navigate }) {
   const [isListening, setIsListening] = useState(false);
@@ -20,24 +21,29 @@ export default function VoicePage({ navigate }) {
   const [errorMessage, setErrorMessage] = useState(null);
   const [rawErrorCode, setRawErrorCode] = useState(null);
 
-  const [conversationHistory, setConversationHistory] = useState([
-    {
-      id: 1,
-      query: 'आज प्याज बेचना सही रहेगा या कुछ दिन रुकना चाहिए?',
-      reply: 'किसान भाई, हमारे AI मॉडल के अनुसार आपको प्याज 5 दिन रोककर रखना चाहिए। 29 अगस्त को उमराने मंडी में आवक कम होने से भाव ₹2,788 तक जाएगा। इससे आपको ढुलाई खर्च काटकर भी ₹184 प्रति क्विंटल का शुद्ध मुनाफा होगा।',
-      badge: 'प्याज सलाह',
-      actionLink: '/app/crop/onion',
-      timestamp: 'आज, दोपहर 1:15'
-    },
-    {
-      id: 2,
-      query: 'ग्वालियर और आगरा मंडी में से किसमें ज्यादा शुद्ध पैसा मिलेगा?',
-      reply: 'सावधान किसान भाई! आगरा मंडी में दिखने वाला भाव ₹2,790 है जो ग्वालियर से ₹370 अधिक दिखता है, लेकिन 128 किमी का भारी भाड़ा और वहां के आढ़तियों की 5.5% दलाली के कारण आपको उल्टे ₹220 प्रति क्विंटल का घाटा होगा! पास की डबरा या ग्वालियर मंडी में बेचना ही सबसे अकलमंदी है।',
-      badge: 'मंडी तुलना',
-      actionLink: '/app/compare',
-      timestamp: 'आज, सुबह 11:40'
-    }
-  ]);
+  // Dynamic conversation history without hardcoded dates
+  const [conversationHistory, setConversationHistory] = useState(() => {
+    const onionTimeline = getCropDynamicTimeline(CROPS[0]);
+    return [
+      {
+        id: 1,
+        query: 'आज प्याज बेचना सही रहेगा या कुछ दिन रुकना चाहिए?',
+        reply: onionTimeline.spokenAdvice,
+        badge: 'प्याज सलाह',
+        actionLink: '/app/crop/onion',
+        timestamp: 'आज'
+      },
+      {
+        id: 2,
+        query: 'ग्वालियर और आगरा मंडी में से किसमें ज्यादा शुद्ध पैसा मिलेगा?',
+        reply: 'सावधान किसान भाई! आगरा मंडी में दिखने वाला भाव ₹2,790 है जो ग्वालियर से ₹370 अधिक दिखता है, लेकिन 128 किमी का भारी भाड़ा और वहां के आढ़तियों की 5.5% दलाली के कारण आपको उल्टे ₹220 प्रति क्विंटल का घाटा होगा! पास की डबरा या ग्वालियर मंडी में बेचना ही सबसे अकलमंदी है।',
+        badge: 'मंडी तुलना',
+        actionLink: '/app/compare',
+        timestamp: 'आज'
+      }
+    ];
+  });
+
   const [statusMessage, setStatusMessage] = useState('माइक दबाकर अपनी बोली में बोलें...');
 
   useEffect(() => {
@@ -141,21 +147,21 @@ export default function VoicePage({ navigate }) {
             <span>भाषिणी वाक् सहायक</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-4xl font-black tracking-tight text-[var(--text-main)]">
             बोलकर समझो, समझकर बेचो
           </h1>
           <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-xl mx-auto">
             माइक दबाएं और सीधे अपनी भाषा में पूछें। कृषिवाणी बोलकर समझाएगा कि कब और कहाँ बेचना बेहतर है।
           </p>
 
-          {/* Center Mic Button */}
+          {/* Center Mic Button with ripple pulse */}
           <div className="pt-4 flex flex-col items-center justify-center">
             <button
               onClick={isListening ? () => bhasiniService.stopListening() : handleStartMic}
-              className={`flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg transition-all transform hover:scale-105 ${
+              className={`relative flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg transition-all transform hover:scale-105 ${
                 isListening
                   ? 'bg-red-600 text-white animate-pulse ring-8 ring-red-200 dark:ring-red-900'
-                  : 'bg-[#2e7d32] hover:bg-[#256629] text-white'
+                  : 'bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white'
               }`}
               title="बोलने के लिए दबाएं"
             >
@@ -163,12 +169,12 @@ export default function VoicePage({ navigate }) {
             </button>
 
             <span className="mt-3 text-xs sm:text-sm font-semibold text-[var(--text-main)]">
-              {interimSpeech ? `सुन रहा हूँ: "${interimSpeech}"` : statusMessage}
+              {interimSpeech ? `पहचाना जा रहा है: "${interimSpeech}"` : statusMessage}
             </span>
 
             {/* Error Message with Code */}
             {errorMessage && (
-              <div className="mt-2.5 max-w-md flex items-center gap-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs font-medium text-left">
+              <div className="mt-2.5 max-w-md flex items-center gap-2 p-2.5 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs font-medium text-left">
                 <AlertCircle className="h-4 w-4 shrink-0" />
                 <span className="flex-1">{errorMessage}</span>
                 {rawErrorCode && (
@@ -185,7 +191,7 @@ export default function VoicePage({ navigate }) {
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
 
         {/* Text Input Option */}
-        <div className="rounded-xl bg-[var(--bg-card)] p-2 shadow-sm border border-[var(--border-color)] flex items-center gap-2">
+        <div className="rounded-2xl bg-[var(--bg-card)] p-2 shadow-sm border border-[var(--border-color)] flex items-center gap-2">
           <input
             type="text"
             value={typedQuery}
@@ -204,26 +210,26 @@ export default function VoicePage({ navigate }) {
               handleExecuteQuery(typedQuery);
               setTypedQuery('');
             }}
-            className="px-4 py-2 rounded-lg bg-[#2e7d32] hover:bg-[#256629] text-white font-bold text-xs shrink-0 transition-colors shadow-sm"
+            className="px-4 py-2 rounded-xl bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white font-bold text-xs shrink-0 transition-colors shadow-sm"
           >
             पूछें
           </button>
         </div>
 
         {/* Quick Voice Topics */}
-        <div className="rounded-xl bg-[var(--bg-card)] p-4 border border-[var(--border-color)] shadow-sm space-y-2.5">
+        <div className="rounded-2xl bg-[var(--bg-card)] p-5 border border-[var(--border-color)] shadow-sm space-y-3">
           <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
             एक क्लिक में पूछें:
           </span>
-          <div className="grid sm:grid-cols-2 gap-2">
+          <div className="grid sm:grid-cols-2 gap-2.5">
             {BHASHINI_VOICE_QUERIES.map((preset) => (
               <button
                 key={preset.id}
                 onClick={() => handleExecuteQuery(preset.queryText)}
-                className="text-left p-2.5 rounded-lg bg-[var(--bg-card-subtle)] hover:bg-[var(--brand-green-subtle)] border border-[var(--border-color)] hover:border-[#2e7d32] transition-all text-xs font-medium text-[var(--text-main)] flex items-center justify-between"
+                className="text-left p-3 rounded-xl bg-[var(--bg-card-subtle)] hover:bg-[var(--brand-green-subtle)] border border-[var(--border-color)] hover:border-[var(--brand-green)] transition-all text-xs font-medium text-[var(--text-main)] flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
-                  <Volume2 className="h-3.5 w-3.5 text-[#2e7d32]" />
+                  <Volume2 className="h-4 w-4 text-[var(--brand-green)]" />
                   <span>{preset.queryText}</span>
                 </div>
               </button>
@@ -234,8 +240,8 @@ export default function VoicePage({ navigate }) {
         {/* History */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-[var(--text-main)] flex items-center gap-1.5">
-              <MessageSquare className="h-4 w-4 text-[#2e7d32]" />
+            <h3 className="font-heading font-bold text-base text-[var(--text-main)] flex items-center gap-1.5">
+              <MessageSquare className="h-4 w-4 text-[var(--brand-green)]" />
               <span>हाल के सवाल व जवाब</span>
             </h3>
             <span className="text-xs text-[var(--text-muted)]">{conversationHistory.length} सवाल</span>
@@ -244,26 +250,26 @@ export default function VoicePage({ navigate }) {
           {conversationHistory.map((item) => (
             <div
               key={item.id}
-              className="rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 shadow-sm space-y-2.5"
+              className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-5 shadow-sm space-y-3 farmer-card"
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="font-semibold text-[var(--text-main)] text-sm">
+                <div className="font-bold text-[var(--text-main)] text-sm sm:text-base">
                   "{item.query}"
                 </div>
-                <span className="text-[10px] text-[var(--text-muted)] shrink-0">{item.timestamp}</span>
+                <span className="text-[11px] text-[var(--text-muted)] shrink-0">{item.timestamp}</span>
               </div>
 
-              <div className="p-3.5 rounded-lg bg-[var(--bg-card-subtle)] text-[var(--text-main)] space-y-2 border border-[var(--border-color)]">
+              <div className="p-4 rounded-xl bg-[var(--bg-card-subtle)] text-[var(--text-main)] space-y-2.5 border border-[var(--border-color)]">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold text-[#2e7d32] bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
+                  <span className="text-[11px] font-bold text-[var(--brand-green)] bg-[var(--brand-green-subtle)] px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                     {item.badge}
                   </span>
 
                   <button
                     onClick={() => handlePlayAudio(item.reply)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#2e7d32] hover:bg-[#256629] text-white text-xs font-semibold"
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[var(--brand-green)] hover:bg-[var(--brand-green-hover)] text-white text-xs font-bold shadow-sm"
                   >
-                    <Volume2 className="h-3 w-3" />
+                    <Volume2 className="h-3.5 w-3.5" />
                     <span>सुनें</span>
                   </button>
                 </div>
@@ -273,13 +279,13 @@ export default function VoicePage({ navigate }) {
                 </p>
 
                 {item.actionLink && (
-                  <div className="pt-1.5 border-t border-[var(--border-color)] flex justify-end">
+                  <div className="pt-2 border-t border-[var(--border-color)] flex justify-end">
                     <button
                       onClick={() => navigate(item.actionLink)}
-                      className="text-xs font-semibold text-[#2e7d32] hover:underline flex items-center gap-1"
+                      className="text-xs font-bold text-[var(--brand-green)] hover:underline flex items-center gap-1"
                     >
                       <span>गणना देखें</span>
-                      <ArrowRight className="h-3 w-3" />
+                      <ArrowRight className="h-3.5 w-3.5" />
                     </button>
                   </div>
                 )}

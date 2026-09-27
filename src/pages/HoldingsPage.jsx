@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Layers, Plus, Calendar, MapPin, ArrowRight, Trash2, Volume2 } from 'lucide-react';
 import { INITIAL_HOLDINGS, CROPS } from '../data/mandiData';
 import { bhasiniService } from '../services/bhasiniService';
+import { formatHindiDate, formatIsoDate } from '../utils/dateUtils';
 
 export default function HoldingsPage({ navigate }) {
   const [lots, setLots] = useState(INITIAL_HOLDINGS);
@@ -24,7 +25,7 @@ export default function HoldingsPage({ navigate }) {
       cropId: crop.id,
       cropName: crop.name,
       quantityQuintal: Number(formQty),
-      storageDate: new Date().toISOString().split('T')[0],
+      storageDate: formatIsoDate(new Date()),
       storageCondition: formStorage,
       location: formLocation,
       recommendedAction: crop.forecastDays > 0 ? 'HOLD' : 'MOVE',
@@ -54,7 +55,7 @@ export default function HoldingsPage({ navigate }) {
       <div className="py-8 px-4 sm:px-6 lg:px-8 border-b border-[var(--border-color)] bg-[var(--bg-header)]">
         <div className="mx-auto max-w-5xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-main)]">
+            <h1 className="text-2xl sm:text-3xl font-heading font-black tracking-tight text-[var(--text-main)]">
               फसल स्टॉक ({lots.length} लॉट)
             </h1>
             <p className="text-xs sm:text-sm text-[var(--text-muted)] mt-1">
@@ -76,14 +77,14 @@ export default function HoldingsPage({ navigate }) {
 
         {/* Stats Summary */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm">
+          <div className="farmer-card p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm">
             <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase block">कुल भंडारित उपज</span>
-            <div className="text-xl sm:text-2xl font-black text-[var(--text-main)] mt-0.5">{totalQuintals} क्विंटल</div>
+            <div className="text-xl sm:text-2xl font-heading font-black text-[var(--text-main)] mt-0.5">{totalQuintals} क्विंटल</div>
           </div>
 
-          <div className="p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm">
+          <div className="farmer-card p-4 rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] shadow-sm">
             <span className="text-[11px] font-bold text-[#d97706] uppercase block">AI सलाह से अतिरिक्त लाभ</span>
-            <div className="text-xl sm:text-2xl font-black text-[#d97706] mt-0.5">+₹{totalPotentialExtraGain.toLocaleString('en-IN')}</div>
+            <div className="text-xl sm:text-2xl font-heading font-black text-[#d97706] mt-0.5">+₹{totalPotentialExtraGain.toLocaleString('en-IN')}</div>
           </div>
         </div>
 
@@ -94,20 +95,20 @@ export default function HoldingsPage({ navigate }) {
             return (
               <div
                 key={lot.id}
-                className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 sm:p-5 shadow-sm space-y-3"
+                className="farmer-card rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 sm:p-5 shadow-sm space-y-3 relative overflow-hidden"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border-color)] pb-3">
                   <div className="flex items-center gap-3">
                     <span className="text-3xl">{crop.icon}</span>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="text-base font-bold text-[var(--text-main)]">{lot.cropName}</h3>
+                        <h3 className="text-base font-heading font-black text-[var(--text-main)]">{lot.cropName}</h3>
                         <span className="text-xs bg-[var(--bg-card-subtle)] text-[var(--text-muted)] font-semibold px-2 py-0.5 rounded border border-[var(--border-color)]">
                           {lot.quantityQuintal} क्विंटल
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-[var(--text-muted)] mt-0.5">
-                        <span>भंडारित: {lot.storageDate}</span>
+                        <span>भंडारित: {formatHindiDate(lot.storageDate)}</span>
                         <span>·</span>
                         <span>{lot.location}</span>
                       </div>

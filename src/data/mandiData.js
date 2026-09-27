@@ -1,5 +1,14 @@
 // कृषिवाणी (KrishiVaani) - Mandi Datasets & Agro-Intelligence
 // Source schemas aligned with Agmarknet (कृषि मंत्रालय, भारत सरकार) & eNAM
+// All dates are computed dynamically relative to today's date
+
+import { 
+  formatHindiDate, 
+  formatIsoDate, 
+  addDays, 
+  subDays, 
+  getCropDynamicTimeline 
+} from '../utils/dateUtils';
 
 export const CROPS = [
   {
@@ -19,8 +28,14 @@ export const CROPS = [
     forecastBestMandi: 'उमराने मंडी',
     gainPerQuintal: 184,
     confidence: 87,
-    reasonHindi: 'उमराने मंडी में 29 अगस्त को आवक कम होने से भाव ₹2,788 तक उछलने का अनुमान है। 5 दिन रुकने पर भाड़ा काटकर भी ₹184/क्विंटल का अतिरिक्त लाभ होगा।',
-    icon: '🧅'
+    icon: '🧅',
+    theme: {
+      stripColor: '#9333EA',
+      cardTint: '#FAF3F8',
+      borderTint: '#EBD8E7',
+      darkCardTint: '#211623',
+      darkBorderTint: '#3B243E'
+    }
   },
   {
     id: 'tomato',
@@ -39,8 +54,14 @@ export const CROPS = [
     forecastBestMandi: 'चांदवड़ मंडी',
     gainPerQuintal: 202,
     confidence: 94,
-    reasonHindi: 'लोकल यार्ड के बजाय आज ही चांदवड़ मंडी में बेचें। अधिक दूरी के बावजूद चांदवड़ में मांग तेज है और ₹202 प्रति क्विंटल अधिक शुद्ध मुनाफा मिलेगा। रुकने पर टमाटर गलने का खतरा है।',
-    icon: '🍅'
+    icon: '🍅',
+    theme: {
+      stripColor: '#E11D48',
+      cardTint: '#FDF3F2',
+      borderTint: '#F9D1CD',
+      darkCardTint: '#271618',
+      darkBorderTint: '#462327'
+    }
   },
   {
     id: 'wheat',
@@ -59,8 +80,14 @@ export const CROPS = [
     forecastBestMandi: 'डबरा मंडी',
     gainPerQuintal: 165,
     confidence: 89,
-    reasonHindi: 'गेहूँ को अभी सूखे गोदाम में रखें। डबरा मंडी में फ्लोर मिलों की नई खरीदारी से 8 दिन बाद भाव ₹2,790 पहुंचने की संभावना है।',
-    icon: '🌾'
+    icon: '🌾',
+    theme: {
+      stripColor: '#D97706',
+      cardTint: '#FDF9EE',
+      borderTint: '#F5E4B8',
+      darkCardTint: '#262013',
+      darkBorderTint: '#44381C'
+    }
   },
   {
     id: 'mustard',
@@ -79,8 +106,14 @@ export const CROPS = [
     forecastBestMandi: 'मुरैना मंडी',
     gainPerQuintal: 140,
     confidence: 85,
-    reasonHindi: 'मुरैना तेल मिलों में सरसों की मांग स्थिर है। 3 दिन में स्थानीय स्तर पर बेचने से परिवहन खर्च कम रहेगा और शुद्ध मुनाफा अधिकतम होगा।',
-    icon: '🌻'
+    icon: '🌻',
+    theme: {
+      stripColor: '#CA8A04',
+      cardTint: '#FEFCE8',
+      borderTint: '#FDF08A',
+      darkCardTint: '#252312',
+      darkBorderTint: '#453E1B'
+    }
   },
   {
     id: 'potato',
@@ -99,8 +132,14 @@ export const CROPS = [
     forecastBestMandi: 'आगरा मंडी',
     gainPerQuintal: 110,
     confidence: 82,
-    reasonHindi: 'कोल्ड स्टोरेज में स्टॉक सुरक्षित रखें। 12 दिनों बाद आगरा मंडी में मांग बढ़ने से ₹110/क्विंटल अतिरिक्त लाभ मिलेगा।',
-    icon: '🥔'
+    icon: '🥔',
+    theme: {
+      stripColor: '#92400E',
+      cardTint: '#FAF6EE',
+      borderTint: '#E8DEC9',
+      darkCardTint: '#251E16',
+      darkBorderTint: '#433425'
+    }
   },
   {
     id: 'soybean',
@@ -119,10 +158,21 @@ export const CROPS = [
     forecastBestMandi: 'उज्जैन मंडी',
     gainPerQuintal: 175,
     confidence: 90,
-    reasonHindi: 'उज्जैन व इंदौर प्लांटों में पेराई मांग बढ़ने से 6 दिन में ₹175/क्विंटल का शुद्ध इजाफा होगा।',
-    icon: '🌱'
+    icon: '🌱',
+    theme: {
+      stripColor: '#16A34A',
+      cardTint: '#F3F9F1',
+      borderTint: '#CFE7C8',
+      darkCardTint: '#17251A',
+      darkBorderTint: '#29432F'
+    }
   }
 ];
+
+// Helper to get dynamically populated crop reason
+export function getCropReasonHindi(crop) {
+  return getCropDynamicTimeline(crop).reasonHindi;
+}
 
 // 3-4 Mandis Per Region for Comparison
 export const REGIONAL_MANDI_CLUSTERS = {
@@ -364,98 +414,119 @@ export const TRANSPORT_MODES = [
   }
 ];
 
-// Default Farmer Lots in Store
-export const INITIAL_HOLDINGS = [
-  {
-    id: 'lot-onion-1',
-    cropId: 'onion',
-    cropName: 'प्याज',
-    quantityQuintal: 40,
-    storageDate: '2026-08-22',
-    storageCondition: 'हवादार जालीदार कमरा',
-    location: 'मुरार, ग्वालियर',
-    recommendedAction: 'HOLD',
-    recommendedDays: 5,
-    targetMandiId: 'umrane',
-    targetMandiName: 'उमराने मंडी',
-    peakDateStr: '29 अगस्त',
-    currentLocalPrice: 2420,
-    targetPrice: 2788,
-    gainPerQuintal: 184,
-    totalGain: 7360,
-    confidence: 87,
-    statusTextHindi: '5 दिन रुकें। 29 अगस्त को भाव ₹2,788 का शिखर छुएगा। भाड़ा काटकर भी ₹7,360 अतिरिक्त मुनाफा होगा।'
-  },
-  {
-    id: 'lot-tomato-2',
-    cropId: 'tomato',
-    cropName: 'टमाटर',
-    quantityQuintal: 15,
-    storageDate: '2026-08-24',
-    storageCondition: 'खेत पर क्रेट्स में',
-    location: 'चांदवड़, नासिक',
-    recommendedAction: 'MOVE',
-    recommendedDays: 0,
-    targetMandiId: 'chandwad',
-    targetMandiName: 'चांदवड़ मंडी',
-    peakDateStr: 'आज ही बेचें',
-    currentLocalPrice: 1620,
-    targetPrice: 1980,
-    gainPerQuintal: 202,
-    totalGain: 3030,
-    confidence: 94,
-    statusTextHindi: 'मंडी बदलें। स्थानीय यार्ड के बजाय चांदवड़ जाएं। ₹202 प्रति क्विंटल अतिरिक्त मिलेंगे।'
-  },
-  {
-    id: 'lot-wheat-3',
-    cropId: 'wheat',
-    cropName: 'गेहूँ',
-    quantityQuintal: 65,
-    storageDate: '2026-08-10',
-    storageCondition: 'पक्का सूखा गोदाम',
-    location: 'घाटीगांव, ग्वालियर',
-    recommendedAction: 'HOLD',
-    recommendedDays: 8,
-    targetMandiId: 'dabra_mandi',
-    targetMandiName: 'डबरा मंडी',
-    peakDateStr: '01 सितम्बर',
-    currentLocalPrice: 2610,
-    targetPrice: 2780,
-    gainPerQuintal: 165,
-    totalGain: 10725,
-    confidence: 89,
-    statusTextHindi: '8 दिन रुकें। डबरा मंडी में फ्लोर मिलों की खरीद से कुल ₹10,725 का सीधा लाभ होगा।'
-  }
-];
+// Helper to generate dynamic Farmer Holdings
+export function getInitialHoldings() {
+  const today = new Date();
 
-// Presets for Spoken Queries
-export const BHASHINI_VOICE_QUERIES = [
-  {
-    id: 'q1',
-    queryText: 'आज प्याज बेचना सही रहेगा या कुछ दिन रुकना चाहिए?',
-    audioBadge: 'प्याज सलाह',
-    replyText: 'किसान भाई, हमारे AI मॉडल के अनुसार आपको प्याज 5 दिन रोककर रखना चाहिए। 29 अगस्त को उमराने मंडी में आवक कम होने से भाव ₹2,788 तक जाएगा। इससे आपको ढुलाई खर्च काटकर भी ₹184 प्रति क्विंटल का शुद्ध मुनाफा होगा।',
-    actionLink: '/app/crop/onion'
-  },
-  {
-    id: 'q2',
-    queryText: 'ग्वालियर और आगरा मंडी में से किसमें ज्यादा शुद्ध पैसा मिलेगा?',
-    audioBadge: 'मंडी तुलना',
-    replyText: 'सावधान किसान भाई! आगरा मंडी में दिखने वाला भाव ₹2,790 है जो ग्वालियर से ₹370 अधिक दिखता है, लेकिन 128 किमी का भारी भाड़ा और वहां के आढ़तियों की 5.5% दलाली के कारण आपको उल्टे ₹220 प्रति क्विंटल का घाटा होगा! पास की डबरा या ग्वालियर मंडी में बेचना ही सबसे अकलमंदी है।',
-    actionLink: '/app/compare'
-  },
-  {
-    id: 'q3',
-    queryText: 'टमाटर का क्या हाल है? क्या रुकने से भाव बढ़ेगा?',
-    audioBadge: 'टमाटर चेतावनी',
-    replyText: 'बिल्कुल नहीं! टमाटर शीघ्र नष्ट होने वाली फसल है। आगामी 3 दिनों में अधिक आवक से भाव ₹150 प्रति क्विंटल गिरेंगे और सड़न भी होगी। तुरंत आज ही चांदवड़ मंडी में माल बेचें।',
-    actionLink: '/app/crop/tomato'
-  },
-  {
-    id: 'q4',
-    queryText: 'दलाली और गाड़ी भाड़े में किसान का कितना पैसा कट जाता है?',
-    audioBadge: 'मुनाफ़ा गणित',
-    replyText: 'औसतन एक किसान अपनी कमाई का 12 से 22 प्रतिशत हिस्सा बेफिजूल दलाली और अनियोजित परिवहन में गँवा देता है। कृषिवाणी का मुनाफ़ा कैलकुलेटर आपको बताता है कि कौन सी गाड़ी और कौन सी अधिकृत मंडी आपके लिए सबसे ज्यादा हाथ में शुद्ध पैसा देगी।',
-    actionLink: '/app/compare'
-  }
-];
+  const onionCrop = CROPS[0];
+  const onionTimeline = getCropDynamicTimeline(onionCrop);
+
+  const tomatoCrop = CROPS[1];
+  const tomatoTimeline = getCropDynamicTimeline(tomatoCrop);
+
+  const wheatCrop = CROPS[2];
+  const wheatTimeline = getCropDynamicTimeline(wheatCrop);
+
+  return [
+    {
+      id: 'lot-onion-1',
+      cropId: 'onion',
+      cropName: 'प्याज',
+      quantityQuintal: 40,
+      storageDate: formatIsoDate(subDays(today, 5)),
+      storageCondition: 'हवादार जालीदार कमरा',
+      location: 'मुरार, ग्वालियर',
+      recommendedAction: 'HOLD',
+      recommendedDays: onionCrop.forecastDays,
+      targetMandiId: 'umrane',
+      targetMandiName: onionCrop.forecastBestMandi,
+      peakDateStr: onionTimeline.peakDateStr,
+      currentLocalPrice: onionCrop.currentAvgModalPrice,
+      targetPrice: onionCrop.forecastPeakPrice,
+      gainPerQuintal: onionCrop.gainPerQuintal,
+      totalGain: onionCrop.gainPerQuintal * 40,
+      confidence: onionCrop.confidence,
+      statusTextHindi: onionTimeline.reasonHindi
+    },
+    {
+      id: 'lot-tomato-2',
+      cropId: 'tomato',
+      cropName: 'टमाटर',
+      quantityQuintal: 15,
+      storageDate: formatIsoDate(subDays(today, 1)),
+      storageCondition: 'खेत पर क्रेट्स में',
+      location: 'चांदवड़, नासिक',
+      recommendedAction: 'MOVE',
+      recommendedDays: 0,
+      targetMandiId: 'chandwad',
+      targetMandiName: tomatoCrop.forecastBestMandi,
+      peakDateStr: tomatoTimeline.peakDateStr,
+      currentLocalPrice: tomatoCrop.currentAvgModalPrice,
+      targetPrice: tomatoCrop.forecastPeakPrice,
+      gainPerQuintal: tomatoCrop.gainPerQuintal,
+      totalGain: tomatoCrop.gainPerQuintal * 15,
+      confidence: tomatoCrop.confidence,
+      statusTextHindi: tomatoTimeline.reasonHindi
+    },
+    {
+      id: 'lot-wheat-3',
+      cropId: 'wheat',
+      cropName: 'गेहूँ',
+      quantityQuintal: 65,
+      storageDate: formatIsoDate(subDays(today, 14)),
+      storageCondition: 'पक्का सूखा गोदाम',
+      location: 'घाटीगांव, ग्वालियर',
+      recommendedAction: 'HOLD',
+      recommendedDays: wheatCrop.forecastDays,
+      targetMandiId: 'dabra_mandi',
+      targetMandiName: wheatCrop.forecastBestMandi,
+      peakDateStr: wheatTimeline.peakDateStr,
+      currentLocalPrice: wheatCrop.currentAvgModalPrice,
+      targetPrice: wheatCrop.forecastPeakPrice,
+      gainPerQuintal: wheatCrop.gainPerQuintal,
+      totalGain: wheatCrop.gainPerQuintal * 65,
+      confidence: wheatCrop.confidence,
+      statusTextHindi: wheatTimeline.reasonHindi
+    }
+  ];
+}
+
+export const INITIAL_HOLDINGS = getInitialHoldings();
+
+// Helper to get dynamic Voice Presets
+export function getBhasiniVoiceQueries() {
+  const onionTimeline = getCropDynamicTimeline(CROPS[0]);
+
+  return [
+    {
+      id: 'q1',
+      queryText: 'आज प्याज बेचना सही रहेगा या कुछ दिन रुकना चाहिए?',
+      audioBadge: 'प्याज सलाह',
+      replyText: onionTimeline.spokenAdvice,
+      actionLink: '/app/crop/onion'
+    },
+    {
+      id: 'q2',
+      queryText: 'ग्वालियर और आगरा मंडी में से किसमें ज्यादा शुद्ध पैसा मिलेगा?',
+      audioBadge: 'मंडी तुलना',
+      replyText: 'सावधान किसान भाई! आगरा मंडी में दिखने वाला भाव ₹2,790 है जो ग्वालियर से ₹370 अधिक दिखता है, लेकिन 128 किमी का भारी भाड़ा और वहां के आढ़तियों की 5.5% दलाली के कारण आपको उल्टे ₹220 प्रति क्विंटल का घाटा होगा! पास की डबरा या ग्वालियर मंडी में बेचना ही सबसे अकलमंदी है।',
+      actionLink: '/app/compare'
+    },
+    {
+      id: 'q3',
+      queryText: 'टमाटर का क्या हाल है? क्या रुकने से भाव बढ़ेगा?',
+      audioBadge: 'टमाटर चेतावनी',
+      replyText: 'बिल्कुल नहीं! टमाटर शीघ्र नष्ट होने वाली फसल है। आगामी दिनों में आवक बढ़ने से भाव गिर सकते हैं और सड़न भी होगी। तुरंत आज ही चांदवड़ मंडी में माल बेचें।',
+      actionLink: '/app/crop/tomato'
+    },
+    {
+      id: 'q4',
+      queryText: 'दलाली और गाड़ी भाड़े में किसान का कितना पैसा कट जाता है?',
+      audioBadge: 'मुनाफ़ा गणित',
+      replyText: 'औसतन एक किसान अपनी कमाई का 12 से 22 प्रतिशत हिस्सा बेफिजूल दलाली और अनियोजित परिवहन में गँवा देता है। कृषिवाणी का मुनाफ़ा कैलकुलेटर आपको बताता है कि कौन सी गाड़ी और कौन सी अधिकृत मंडी आपके लिए सबसे ज्यादा हाथ में शुद्ध पैसा देगी।',
+      actionLink: '/app/compare'
+    }
+  ];
+}
+
+export const BHASHINI_VOICE_QUERIES = getBhasiniVoiceQueries();
