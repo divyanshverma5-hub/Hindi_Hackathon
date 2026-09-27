@@ -2,7 +2,7 @@
 // Based on SIH & Hindi Hackathon Technical Approach:
 // Net Profit = Forecasted Mandi Price - (Transport Cost + Broker Commission + Crop Decay Loss + Handling/Cess)
 
-import { TRANSPORT_MODES, CROPS } from '../data/mandiData';
+import { TRANSPORT_MODES, CROPS } from '../data/mandiData.js';
 
 /**
  * Calculate detailed cost breakdown and net profit for a single Mandi

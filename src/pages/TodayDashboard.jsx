@@ -93,7 +93,10 @@ export default function TodayDashboard({
           <div className="flex items-center gap-2 shrink-0">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="font-bold text-[var(--brand-green)] text-[11px] uppercase tracking-wide">
-              Agmarknet सजीव भाव:
+              Agmarknet भाव:
+            </span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--bg-card)] border border-[var(--border-color)] px-1.5 py-0.5 rounded">
+              डेमो डेटा
             </span>
           </div>
 

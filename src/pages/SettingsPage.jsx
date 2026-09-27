@@ -193,13 +193,20 @@ export default function SettingsPage({
 
         </form>
 
-        <div className="p-4 rounded-xl bg-[var(--bg-card-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] space-y-1">
-          <div className="font-bold text-[var(--text-main)]">
-            कृषिवाणी · हिंदी हैकाथॉन 2026
+        <div className="p-4 rounded-xl bg-[var(--bg-card-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] space-y-1.5">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-[var(--text-main)]">डेटा स्रोत व API स्थिति:</span>
+            <span className="text-[10px] font-semibold text-[var(--text-muted)] bg-[var(--bg-card)] border border-[var(--border-color)] px-2 py-0.5 rounded">
+              Agmarknet (डेमो डेटा)
+            </span>
           </div>
-          <p>
-            टीम: HD Falcons (दिव्यांश वर्मा · हर्षित गुप्ता) · IIITM ग्वालियर
+          <p className="text-[11px] leading-relaxed">
+            वर्तमान में 180-दिवसीय Agmarknet ऐतिहासिक मॉडल का उपयोग हो रहा है। वास्तविक सरकारी API हेतु <code className="text-[var(--brand-green)] font-mono">.env</code> में <code className="text-[var(--brand-green)] font-mono">VITE_DATA_GOV_API_KEY</code> जोड़ें।
           </p>
+          <div className="pt-2 border-t border-[var(--border-color)] flex items-center justify-between text-[11px]">
+            <span>कृषिवाणी · हिंदी हैकाथॉन 2026</span>
+            <span>IIITM ग्वालियर</span>
+          </div>
         </div>
 
       </div>

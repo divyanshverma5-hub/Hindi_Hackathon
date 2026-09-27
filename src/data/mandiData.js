@@ -8,7 +8,7 @@ import {
   addDays, 
   subDays, 
   getCropDynamicTimeline 
-} from '../utils/dateUtils';
+} from '../utils/dateUtils.js';
 
 export const CROPS = [
   {
@@ -361,6 +361,194 @@ export const REGIONAL_MANDI_CLUSTERS = {
         },
         arrivalsTodayQtl: 19200,
         paymentMode: 'तत्काल भुगतान'
+      }
+    ]
+  },
+  nagpur_cluster: {
+    regionName: 'नागपुर - विदर्भ संभाग',
+    baseFarmerLocation: 'नागपुर ग्रामीण / कलमना',
+    mandis: [
+      {
+        id: 'nagpur_kalamna',
+        name: 'कलमना कृषि उपज मंडी, नागपुर',
+        district: 'नागपुर',
+        state: 'महाराष्ट्र',
+        distanceKm: 8,
+        isLocal: true,
+        apmcRegulated: true,
+        brokerCommissionPercent: 1.5,
+        handlingFeePerQtl: 18,
+        congestionWaitHours: 2,
+        prices: {
+          onion: 2480,
+          tomato: 1680,
+          wheat: 2620,
+          mustard: 5350,
+          potato: 1330,
+          soybean: 4660
+        },
+        arrivalsTodayQtl: 8500,
+        paymentMode: 'eNAM / तत्काल बैंक ट्रांसफर'
+      },
+      {
+        id: 'nagpur_cotton_market',
+        name: 'इतवारी व कॉटन यार्ड, नागपुर',
+        district: 'नागपुर',
+        state: 'महाराष्ट्र',
+        distanceKm: 5,
+        isLocal: true,
+        apmcRegulated: false,
+        brokerCommissionPercent: 2.5,
+        handlingFeePerQtl: 15,
+        congestionWaitHours: 1,
+        prices: {
+          onion: 2420,
+          tomato: 1620,
+          wheat: 2580,
+          mustard: 5300,
+          potato: 1300,
+          soybean: 4600
+        },
+        arrivalsTodayQtl: 2800,
+        paymentMode: 'नकद'
+      },
+      {
+        id: 'katol_mandi',
+        name: 'काटोल कृषि उपज मंडी',
+        district: 'नागपुर',
+        state: 'महाराष्ट्र',
+        distanceKm: 55,
+        isLocal: false,
+        apmcRegulated: true,
+        brokerCommissionPercent: 2.0,
+        handlingFeePerQtl: 20,
+        congestionWaitHours: 3,
+        prices: {
+          onion: 2510,
+          tomato: 1700,
+          wheat: 2640,
+          mustard: 5380,
+          potato: 1340,
+          soybean: 4680
+        },
+        arrivalsTodayQtl: 4200,
+        paymentMode: 'बैंक ट्रांसफर'
+      },
+      {
+        id: 'amravati_mandi',
+        name: 'अमरावती फल व सब्जी मंडी',
+        district: 'अमरावती',
+        state: 'महाराष्ट्र',
+        distanceKm: 155,
+        isLocal: false,
+        apmcRegulated: true,
+        brokerCommissionPercent: 4.5,
+        handlingFeePerQtl: 28,
+        congestionWaitHours: 7,
+        prices: {
+          onion: 2680,
+          tomato: 1840,
+          wheat: 2690,
+          mustard: 5450,
+          potato: 1380,
+          soybean: 4720
+        },
+        arrivalsTodayQtl: 11000,
+        paymentMode: 'आढ़तिया चेक / 2 दिन'
+      }
+    ]
+  },
+  indore_cluster: {
+    regionName: 'इंदौर - मालवा संभाग',
+    baseFarmerLocation: 'सांवेर / देपालपुर, इंदौर',
+    mandis: [
+      {
+        id: 'indore_choithram',
+        name: 'देवी अहिल्याबाई होलकर मंडी (चोइथराम), इंदौर',
+        district: 'इंदौर',
+        state: 'मध्य प्रदेश',
+        distanceKm: 6,
+        isLocal: true,
+        apmcRegulated: true,
+        brokerCommissionPercent: 1.5,
+        handlingFeePerQtl: 16,
+        congestionWaitHours: 2,
+        prices: {
+          onion: 2520,
+          tomato: 1720,
+          wheat: 2710,
+          mustard: 5380,
+          potato: 1350,
+          soybean: 4710
+        },
+        arrivalsTodayQtl: 22000,
+        paymentMode: 'eNAM / RTGS'
+      },
+      {
+        id: 'indore_chhawani',
+        name: 'छावनी अनाज मंडी, इंदौर',
+        district: 'इंदौर',
+        state: 'मध्य प्रदेश',
+        distanceKm: 7,
+        isLocal: true,
+        apmcRegulated: true,
+        brokerCommissionPercent: 1.8,
+        handlingFeePerQtl: 18,
+        congestionWaitHours: 3,
+        prices: {
+          onion: 2480,
+          tomato: 1650,
+          wheat: 2730,
+          mustard: 5410,
+          potato: 1320,
+          soybean: 4740
+        },
+        arrivalsTodayQtl: 16500,
+        paymentMode: 'eNAM सीधे बैंक खाते में'
+      },
+      {
+        id: 'sanwer_mandi',
+        name: 'सांवेर कृषि उपज मंडी',
+        district: 'इंदौर',
+        state: 'मध्य प्रदेश',
+        distanceKm: 32,
+        isLocal: false,
+        apmcRegulated: true,
+        brokerCommissionPercent: 2.0,
+        handlingFeePerQtl: 18,
+        congestionWaitHours: 2,
+        prices: {
+          onion: 2540,
+          tomato: 1690,
+          wheat: 2700,
+          mustard: 5360,
+          potato: 1330,
+          soybean: 4680
+        },
+        arrivalsTodayQtl: 5800,
+        paymentMode: 'बैंक ट्रांसफर'
+      },
+      {
+        id: 'dewas_mandi',
+        name: 'देवास कृषि उपज मंडी',
+        district: 'देवास',
+        state: 'मध्य प्रदेश',
+        distanceKm: 38,
+        isLocal: false,
+        apmcRegulated: true,
+        brokerCommissionPercent: 2.2,
+        handlingFeePerQtl: 20,
+        congestionWaitHours: 4,
+        prices: {
+          onion: 2580,
+          tomato: 1740,
+          wheat: 2720,
+          mustard: 5390,
+          potato: 1340,
+          soybean: 4700
+        },
+        arrivalsTodayQtl: 9200,
+        paymentMode: 'eNAM'
       }
     ]
   }

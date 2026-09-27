@@ -73,6 +73,11 @@ export function subDays(date, days) {
 export function getCropDynamicTimeline(crop) {
   const today = new Date();
   
+  // Calculate price range (+/- 2.5% around peak)
+  const rangeLower = Math.round(crop.forecastPeakPrice * 0.975);
+  const rangeUpper = Math.round(crop.forecastPeakPrice * 1.025);
+  const priceRangeStr = `₹${rangeLower.toLocaleString('en-IN')}–₹${rangeUpper.toLocaleString('en-IN')}`;
+
   if (!crop.forecastDays || crop.forecastDays === 0) {
     return {
       peakDate: today,
@@ -81,8 +86,9 @@ export function getCropDynamicTimeline(crop) {
       actionText: 'मंडी बदलें',
       actionVerb: 'आज ही बेचें',
       daysDiff: 0,
-      reasonHindi: `स्थानीय यार्ड के बजाय आज ही ${crop.forecastBestMandi} में बेचें। अधिक दूरी के बावजूद मांग तेज है और ₹${crop.gainPerQuintal} प्रति क्विंटल अधिक शुद्ध मुनाफा मिलेगा। रुकने पर फसल गलने का खतरा है।`,
-      spokenAdvice: `किसान भाई, ${crop.name} के लिए तुरंत आज ही ${crop.forecastBestMandi} जाएं। स्थानीय यार्ड के मुकाबले ₹${crop.gainPerQuintal} प्रति क्विंटल अधिक शुद्ध मुनाफा मिलेगा।`
+      priceRangeStr,
+      reasonHindi: `स्थानीय यार्ड के बजाय आज ही ${crop.forecastBestMandi} में बेचें। पिछले रुझान के अनुसार रुकने पर फसल गलने का खतरा है और यहाँ ₹${crop.gainPerQuintal}/क्विंटल अधिक शुद्ध मुनाफा मिलेगा।`,
+      spokenAdvice: `किसान भाई, ${crop.name} शीघ्र नष्ट होने वाली फसल है। पिछले भावों के रुझान व मौसमी आवक के अनुसार रुकने पर सड़न से भारी नुकसान होगा। तुरंत आज ही ${crop.forecastBestMandi} में बेचें, जहाँ ढुलाई काटकर भी ₹${crop.gainPerQuintal} प्रति क्विंटल अधिक शुद्ध मुनाफा मिलेगा।`
     };
   }
 
@@ -96,7 +102,8 @@ export function getCropDynamicTimeline(crop) {
     actionText: `${crop.forecastDays} दिन रुकें`,
     actionVerb: 'रोककर रखें',
     daysDiff: crop.forecastDays,
-    reasonHindi: `${crop.forecastBestMandi} में ${peakDateStr} को आवक कम होने से भाव ₹${crop.forecastPeakPrice.toLocaleString('en-IN')} तक उछलने का अनुमान है। ${crop.forecastDays} दिन रुकने पर भाड़ा काटकर भी ₹${crop.gainPerQuintal}/क्विंटल का अतिरिक्त लाभ होगा।`,
-    spokenAdvice: `किसान भाई, हमारे AI मॉडल के अनुसार आपको ${crop.name} ${crop.forecastDays} दिन रोककर रखना चाहिए। ${peakDateStr} को ${crop.forecastBestMandi} में भाव ₹${crop.forecastPeakPrice.toLocaleString('en-IN')} तक जाएगा। इससे आपको ढुलाई खर्च काटकर भी ₹${crop.gainPerQuintal} प्रति क्विंटल का शुद्ध मुनाफा होगा।`
+    priceRangeStr,
+    reasonHindi: `${crop.forecastBestMandi} में ${peakDateStr} तक भाव ${priceRangeStr} तक रहने का अनुमान है (${crop.confidence}% विश्वसनीयता)। ${crop.forecastDays} दिन रुकने पर भाड़ा काटकर भी ₹${crop.gainPerQuintal}/क्विंटल का अतिरिक्त लाभ होगा।`,
+    spokenAdvice: `किसान भाई, पिछले 180 दिनों के भावों के रुझान व आवक के अनुसार आपको ${crop.name} ${crop.forecastDays} दिन रोककर रखना चाहिए। ${peakDateStr} को ${crop.forecastBestMandi} में भाव ${priceRangeStr} के बीच रहने का अनुमान है (${crop.confidence}% विश्वसनीयता)। इससे आपको ढुलाई खर्च काटकर भी ₹${crop.gainPerQuintal} प्रति क्विंटल का अतिरिक्त शुद्ध मुनाफा होगा।`
   };
 }
