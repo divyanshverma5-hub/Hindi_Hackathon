@@ -4,13 +4,10 @@ import {
   VolumeX, 
   Mic, 
   MicOff, 
-  Sparkles, 
   ArrowRight, 
-  PhoneCall, 
   Radio, 
   MessageSquare,
-  HelpCircle,
-  CheckCircle2
+  AlertCircle
 } from 'lucide-react';
 import { bhasiniService } from '../services/bhasiniService';
 import { BHASHINI_VOICE_QUERIES } from '../data/mandiData';
@@ -19,12 +16,16 @@ export default function VoicePage({ navigate }) {
   const [isListening, setIsListening] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [typedQuery, setTypedQuery] = useState('');
+  const [interimSpeech, setInterimSpeech] = useState('');
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [rawErrorCode, setRawErrorCode] = useState(null);
+
   const [conversationHistory, setConversationHistory] = useState([
     {
       id: 1,
       query: 'आज प्याज बेचना सही रहेगा या कुछ दिन रुकना चाहिए?',
       reply: 'किसान भाई, हमारे AI मॉडल के अनुसार आपको प्याज 5 दिन रोककर रखना चाहिए। 29 अगस्त को उमराने मंडी में आवक कम होने से भाव ₹2,788 तक जाएगा। इससे आपको ढुलाई खर्च काटकर भी ₹184 प्रति क्विंटल का शुद्ध मुनाफा होगा।',
-      badge: 'प्याज AI सलाह',
+      badge: 'प्याज सलाह',
       actionLink: '/app/crop/onion',
       timestamp: 'आज, दोपहर 1:15'
     },
@@ -43,14 +44,32 @@ export default function VoicePage({ navigate }) {
     const unsub = bhasiniService.subscribe((event) => {
       if (event.type === 'listening_start') {
         setIsListening(true);
+        setErrorMessage(null);
+        setRawErrorCode(null);
+        setInterimSpeech('');
         setStatusMessage('सुन रहा हूँ... अपनी बात कहें...');
+      }
+      if (event.type === 'listening_interim') {
+        setInterimSpeech(event.transcript);
+        setStatusMessage(`पहचाना जा रहा है: "${event.transcript}"`);
+      }
+      if (event.type === 'listening_result') {
+        setIsListening(false);
+        setInterimSpeech('');
+        if (event.transcript) {
+          handleExecuteQuery(event.transcript);
+        }
+      }
+      if (event.type === 'listening_error') {
+        setIsListening(false);
+        setRawErrorCode(event.error);
+        setErrorMessage(event.message || `माइक त्रुटि [${event.error}]`);
+        setStatusMessage('माइक में समस्या आई');
       }
       if (event.type === 'listening_end') {
         setIsListening(false);
         if (event.transcript) {
           handleExecuteQuery(event.transcript);
-        } else {
-          setStatusMessage('आवाज़ नहीं मिली। कृपया माइक दबाकर पुनः बोलें।');
         }
       }
       if (event.type === 'speaking_start') {
@@ -63,18 +82,29 @@ export default function VoicePage({ navigate }) {
     return unsub;
   }, []);
 
-  const handleStartMic = () => {
+  const handleStartMic = async () => {
     if (isPlaying) bhasiniService.stopSpeaking();
+    setErrorMessage(null);
+    setRawErrorCode(null);
+    setInterimSpeech('');
+    setStatusMessage('माइक प्रारंभ हो रहा है...');
+
     bhasiniService.startListening({
       onResult: (text) => handleExecuteQuery(text),
-      onError: (err) => setStatusMessage(err)
+      onInterim: (text) => setInterimSpeech(text),
+      onError: (err, code) => {
+        setErrorMessage(err);
+        setRawErrorCode(code);
+        setStatusMessage('माइक में समस्या आई');
+      }
     });
   };
 
   const handleExecuteQuery = (text) => {
     if (!text || !text.trim()) return;
-    setStatusMessage('भाषिणी AI विश्लेषण कर रहा है...');
+    setStatusMessage('AI विश्लेषण कर रहा है...');
     const result = bhasiniService.processHindiQuery(text);
+    if (!result) return;
 
     const newEntry = {
       id: Date.now(),
@@ -101,53 +131,61 @@ export default function VoicePage({ navigate }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9F5] text-[#1E2922] pb-24">
+    <div className="min-h-screen pb-20 bg-[var(--bg-page)] text-[var(--text-main)] transition-colors">
       
       {/* Header */}
-      <div className="bg-[#14231b] text-white py-12 px-4 sm:px-6 lg:px-8 border-b border-[#2d6a4f]/30">
-        <div className="mx-auto max-w-4xl text-center space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#1b3528] border border-[#e09f3e]/40 text-xs text-[#e09f3e] font-bold">
-            <Radio className="h-3.5 w-3.5 animate-pulse" />
-            <span>राष्ट्रीय भाषा अनुवाद मिशन (MeitY) · भाषिणी Voice Engine</span>
+      <div className="py-10 px-4 sm:px-6 lg:px-8 border-b border-[var(--border-color)] bg-[var(--bg-header)] text-center">
+        <div className="mx-auto max-w-3xl space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--brand-green-subtle)] text-[#2e7d32] text-xs font-bold">
+            <Radio className="h-3.5 w-3.5" />
+            <span>भाषिणी वाक् सहायक</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
             बोलकर समझो, समझकर बेचो
           </h1>
-          <p className="text-sm sm:text-base text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            पढ़ना-लिखना जरूरी नहीं। माइक दबाएं और सीधे अपनी भाषा में पूछें। कृषिवाणी बोलकर समझाएगा कि कब और कहाँ बेचना बेहतर है।
+          <p className="text-xs sm:text-sm text-[var(--text-muted)] max-w-xl mx-auto">
+            माइक दबाएं और सीधे अपनी भाषा में पूछें। कृषिवाणी बोलकर समझाएगा कि कब और कहाँ बेचना बेहतर है।
           </p>
 
-          {/* Big Center Microphone */}
+          {/* Center Mic Button */}
           <div className="pt-4 flex flex-col items-center justify-center">
             <button
               onClick={isListening ? () => bhasiniService.stopListening() : handleStartMic}
-              className={`relative flex h-24 w-24 items-center justify-center rounded-3xl shadow-2xl transition-all transform hover:scale-105 ${
+              className={`flex h-20 w-20 items-center justify-center rounded-2xl shadow-lg transition-all transform hover:scale-105 ${
                 isListening
-                  ? 'bg-red-600 text-white animate-pulse ring-8 ring-red-400'
-                  : 'bg-gradient-to-br from-[#e09f3e] via-[#d97706] to-[#b45309] text-[#14231b]'
+                  ? 'bg-red-600 text-white animate-pulse ring-8 ring-red-200 dark:ring-red-900'
+                  : 'bg-[#2e7d32] hover:bg-[#256629] text-white'
               }`}
               title="बोलने के लिए दबाएं"
             >
-              {isListening ? <MicOff className="h-10 w-10" /> : <Mic className="h-10 w-10" />}
-              
-              {/* Ripple circles when listening */}
-              {isListening && (
-                <span className="absolute -inset-2 rounded-3xl border-2 border-red-400 animate-ping opacity-75"></span>
-              )}
+              {isListening ? <MicOff className="h-8 w-8" /> : <Mic className="h-8 w-8" />}
             </button>
 
-            <span className="mt-3 text-xs sm:text-sm font-bold text-[#e09f3e]">
-              {statusMessage}
+            <span className="mt-3 text-xs sm:text-sm font-semibold text-[var(--text-main)]">
+              {interimSpeech ? `सुन रहा हूँ: "${interimSpeech}"` : statusMessage}
             </span>
+
+            {/* Error Message with Code */}
+            {errorMessage && (
+              <div className="mt-2.5 max-w-md flex items-center gap-2 p-2.5 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 text-xs font-medium text-left">
+                <AlertCircle className="h-4 w-4 shrink-0" />
+                <span className="flex-1">{errorMessage}</span>
+                {rawErrorCode && (
+                  <span className="font-mono text-[10px] bg-red-200 dark:bg-red-900 px-1.5 py-0.5 rounded text-red-900 dark:text-red-100 shrink-0">
+                    कोड: {rawErrorCode}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 -mt-6 space-y-6">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
 
-        {/* Text Input Bar (For Typing Alternative) */}
-        <div className="rounded-2xl bg-white p-3 shadow-lg border border-gray-200 flex items-center gap-2">
+        {/* Text Input Option */}
+        <div className="rounded-xl bg-[var(--bg-card)] p-2 shadow-sm border border-[var(--border-color)] flex items-center gap-2">
           <input
             type="text"
             value={typedQuery}
@@ -158,98 +196,90 @@ export default function VoicePage({ navigate }) {
                 setTypedQuery('');
               }
             }}
-            placeholder="यदि लिखना चाहें तो यहाँ प्रश्न लिखें (उदा. टमाटर कब बेचें?)..."
-            className="w-full px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
+            placeholder="यहाँ प्रश्न लिखें या ऊपर माइक दबाएं..."
+            className="w-full px-3 py-2 text-xs sm:text-sm bg-transparent text-[var(--text-main)] placeholder-gray-400 focus:outline-none"
           />
           <button
             onClick={() => {
               handleExecuteQuery(typedQuery);
               setTypedQuery('');
             }}
-            className="px-5 py-2.5 rounded-xl bg-[#2e7d32] hover:bg-[#388e3c] text-white font-bold text-xs shrink-0 transition-colors shadow"
+            className="px-4 py-2 rounded-lg bg-[#2e7d32] hover:bg-[#256629] text-white font-bold text-xs shrink-0 transition-colors shadow-sm"
           >
             पूछें
           </button>
         </div>
 
         {/* Quick Voice Topics */}
-        <div className="rounded-2xl bg-white p-5 border border-gray-200 shadow-md space-y-3">
-          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block">
-            एक क्लिक में सुनें (One-Tap Voice Prompts):
+        <div className="rounded-xl bg-[var(--bg-card)] p-4 border border-[var(--border-color)] shadow-sm space-y-2.5">
+          <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
+            एक क्लिक में पूछें:
           </span>
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid sm:grid-cols-2 gap-2">
             {BHASHINI_VOICE_QUERIES.map((preset) => (
               <button
                 key={preset.id}
                 onClick={() => handleExecuteQuery(preset.queryText)}
-                className="text-left p-3 rounded-xl bg-gray-50 hover:bg-emerald-50/70 border border-gray-200 hover:border-[#2e7d32] transition-all text-xs font-semibold text-gray-800 flex items-center justify-between group"
+                className="text-left p-2.5 rounded-lg bg-[var(--bg-card-subtle)] hover:bg-[var(--brand-green-subtle)] border border-[var(--border-color)] hover:border-[#2e7d32] transition-all text-xs font-medium text-[var(--text-main)] flex items-center justify-between"
               >
                 <div className="flex items-center gap-2">
-                  <Volume2 className="h-4 w-4 text-[#e09f3e] group-hover:scale-110" />
+                  <Volume2 className="h-3.5 w-3.5 text-[#2e7d32]" />
                   <span>{preset.queryText}</span>
                 </div>
-                <span className="text-[10px] text-gray-400 bg-white px-2 py-0.5 rounded border">
-                  {preset.audioBadge}
-                </span>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Conversation Stream History */}
-        <div className="space-y-4">
+        {/* History */}
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-base text-[#14231b] flex items-center gap-2">
+            <h3 className="font-bold text-sm text-[var(--text-main)] flex items-center gap-1.5">
               <MessageSquare className="h-4 w-4 text-[#2e7d32]" />
-              <span>हाल ही में पूछे गए सवाल व बोलती सलाह:</span>
+              <span>हाल के सवाल व जवाब</span>
             </h3>
-            <span className="text-xs text-gray-500">{conversationHistory.length} संवाद</span>
+            <span className="text-xs text-[var(--text-muted)]">{conversationHistory.length} सवाल</span>
           </div>
 
           {conversationHistory.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl bg-white border border-gray-200 p-5 sm:p-6 shadow-md space-y-3 transition-all hover:border-[#2e7d32]"
+              className="rounded-xl bg-[var(--bg-card)] border border-[var(--border-color)] p-4 shadow-sm space-y-2.5"
             >
-              {/* Question */}
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2 font-bold text-gray-900 text-sm sm:text-base">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-[#2e7d32] text-xs shrink-0 font-mono">
-                    Q
-                  </span>
-                  <span>"{item.query}"</span>
+                <div className="font-semibold text-[var(--text-main)] text-sm">
+                  "{item.query}"
                 </div>
-                <span className="text-[11px] text-gray-400 shrink-0">{item.timestamp}</span>
+                <span className="text-[10px] text-[var(--text-muted)] shrink-0">{item.timestamp}</span>
               </div>
 
-              {/* Spoken Answer */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-[#14231b] to-[#1b3528] text-white space-y-2 border border-[#2d6a4f]/50">
+              <div className="p-3.5 rounded-lg bg-[var(--bg-card-subtle)] text-[var(--text-main)] space-y-2 border border-[var(--border-color)]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#e09f3e] bg-black/40 px-2.5 py-0.5 rounded-full border border-[#e09f3e]/30">
+                  <span className="text-[10px] font-bold text-[#2e7d32] bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
                     {item.badge}
                   </span>
 
                   <button
                     onClick={() => handlePlayAudio(item.reply)}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#2e7d32] hover:bg-[#388e3c] text-white text-xs font-bold transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#2e7d32] hover:bg-[#256629] text-white text-xs font-semibold"
                   >
-                    <Volume2 className="h-3.5 w-3.5 text-[#e09f3e]" />
-                    <span>आवाज़ में सुनें</span>
+                    <Volume2 className="h-3 w-3" />
+                    <span>सुनें</span>
                   </button>
                 </div>
 
-                <p className="text-xs sm:text-sm text-gray-200 leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-[var(--text-main)] leading-relaxed font-medium">
                   {item.reply}
                 </p>
 
                 {item.actionLink && (
-                  <div className="pt-2 border-t border-[#2d6a4f]/40 flex justify-end">
+                  <div className="pt-1.5 border-t border-[var(--border-color)] flex justify-end">
                     <button
                       onClick={() => navigate(item.actionLink)}
-                      className="text-xs font-bold text-[#e09f3e] hover:underline flex items-center gap-1"
+                      className="text-xs font-semibold text-[#2e7d32] hover:underline flex items-center gap-1"
                     >
-                      <span>संबंधित गणित व रिपोर्ट देखें</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <span>गणना देखें</span>
+                      <ArrowRight className="h-3 w-3" />
                     </button>
                   </div>
                 )}

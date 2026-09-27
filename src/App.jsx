@@ -24,16 +24,35 @@ export default function App() {
     return '/';
   });
 
-  const [theme, setTheme] = useState('noon'); // 'noon' (light) or 'slate' (dark)
-  const [language, setLanguage] = useState('hi'); // Default Hindi (हिन्दी)
+  // Persistent Day / Night theme (saved in localStorage)
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('krishivaani_theme') || 'noon';
+    }
+    return 'noon';
+  });
+
+  const [language, setLanguage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('krishivaani_lang') || 'hi';
+    }
+    return 'hi';
+  });
+
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
   const [passData, setPassData] = useState(null);
 
-  // Sync theme with html data-theme attribute
+  // Sync theme with html data-theme attribute & localStorage
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('krishivaani_theme', theme);
   }, [theme]);
+
+  // Sync language with localStorage
+  useEffect(() => {
+    localStorage.setItem('krishivaani_lang', language);
+  }, [language]);
 
   // Sync router state with window events
   useEffect(() => {
@@ -151,7 +170,7 @@ export default function App() {
       );
     }
 
-    // Default Fallback to TodayDashboard
+    // Default Fallback
     return (
       <TodayDashboard
         navigate={navigate}
@@ -162,9 +181,7 @@ export default function App() {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-200 ${
-      theme === 'slate' ? 'bg-[#0f1914] text-[#f3f4f6]' : 'bg-[#F8F9F5] text-[#1E2922]'
-    }`}>
+    <div className="min-h-screen flex flex-col font-sans transition-colors duration-200 bg-[var(--bg-page)] text-[var(--text-main)]">
       
       {/* Universal Top Navigation Header */}
       <Navbar
@@ -182,7 +199,7 @@ export default function App() {
         {renderPage()}
       </div>
 
-      {/* Global Interactive Bhasini Voice Modal */}
+      {/* Global Interactive Voice Modal */}
       <VoiceAssistantModal
         isOpen={isVoiceModalOpen}
         onClose={() => setIsVoiceModalOpen(false)}

@@ -3,13 +3,9 @@ import {
   Sliders, 
   Globe, 
   MapPin, 
-  Truck, 
-  PhoneCall, 
   WifiOff, 
   CheckCircle2, 
-  Save, 
-  ShieldCheck,
-  RefreshCw
+  Save
 } from 'lucide-react';
 import { TRANSPORT_MODES } from '../data/mandiData';
 
@@ -32,161 +28,143 @@ export default function SettingsPage({
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9F5] text-[#1E2922] pb-24">
+    <div className="min-h-screen bg-[var(--bg-page)] text-[var(--text-main)] pb-20 transition-colors">
       
       {/* Header */}
-      <div className="bg-[#14231b] text-white py-10 px-4 sm:px-6 lg:px-8 border-b border-[#2d6a4f]/30">
-        <div className="mx-auto max-w-4xl space-y-2">
-          <div className="flex items-center gap-2">
-            <Sliders className="h-4 w-4 text-[#e09f3e]" />
-            <span className="text-xs font-bold uppercase tracking-wider text-[#e09f3e]">
-              किसान प्रोफ़ाइल व सिस्टम सेटिंग्स
-            </span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+      <div className="py-8 px-4 sm:px-6 lg:px-8 border-b border-[var(--border-color)] bg-[var(--bg-header)]">
+        <div className="mx-auto max-w-3xl space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[var(--text-main)]">
             सेटिंग्स व ऑफ़लाइन प्रबंधन
           </h1>
-          <p className="text-xs sm:text-sm text-gray-300">
-            मातृभाषा, गृह जिला, डिफ़ॉल्ट ढुलाई वाहन और कम नेटवर्क वाले क्षेत्रों हेतु SMS सुविधा।
+          <p className="text-xs sm:text-sm text-[var(--text-muted)]">
+            मातृभाषा, गृह जिला, डिफ़ॉल्ट ढुलाई वाहन और कमज़ोर नेटवर्क हेतु SMS सुविधा।
           </p>
         </div>
       </div>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 -mt-5 space-y-6">
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 mt-6 space-y-6">
 
-        <form onSubmit={handleSave} className="space-y-6">
+        <form onSubmit={handleSave} className="space-y-5">
           
           {/* Section 1: Language & Theme */}
-          <div className="rounded-2xl bg-white border border-gray-200 p-6 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b pb-3">
-              <Globe className="h-5 w-5 text-[#2e7d32]" />
-              <h3 className="font-extrabold text-base text-[#14231b]">मातृभाषा व स्क्रीन थीम</h3>
+          <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-2.5">
+              <Globe className="h-4 w-4 text-[#2e7d32]" />
+              <h3 className="font-bold text-sm text-[var(--text-main)]">भाषा व स्क्रीन थीम</h3>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+            <div className="grid sm:grid-cols-2 gap-4 text-xs sm:text-sm">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1.5">
-                  प्राथमिक भाषा (Default Language):
+                <label className="block font-semibold mb-1 text-[var(--text-main)]">
+                  प्राथमिक भाषा:
                 </label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 p-2.5 font-bold focus:border-[#2e7d32] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 font-medium text-[var(--text-main)] focus:border-[#2e7d32] focus:outline-none"
                 >
-                  <option value="hi">हिन्दी (Hindi - डिफ़ॉल्ट)</option>
-                  <option value="en">English (अंग्रेज़ी)</option>
-                  <option value="mr">मराठी (Marathi)</option>
+                  <option value="hi">हिन्दी (डिफ़ॉल्ट)</option>
+                  <option value="en">English</option>
+                  <option value="mr">मराठी</option>
                 </select>
-                <span className="text-xs text-gray-500 mt-1 block">
-                  भाषिणी AI इसी भाषा में आवाज़ में बोलेगा
-                </span>
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1.5">
-                  स्क्रीन रंग थीम (Theme):
+                <label className="block font-semibold mb-1 text-[var(--text-main)]">
+                  स्क्रीन रंग थीम:
                 </label>
                 <button
                   type="button"
                   onClick={toggleTheme}
-                  className="w-full rounded-xl border border-gray-300 p-2.5 font-bold flex items-center justify-between hover:bg-gray-50 text-left"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 font-medium flex items-center justify-between hover:bg-[var(--bg-card-subtle)] text-left"
                 >
-                  <span>{theme === 'noon' ? '☀️ दोपहर मोड (Noon Light)' : '🌙 सांझ मोड (Mandi Slate Dark)'}</span>
-                  <span className="text-xs text-[#2e7d32]">बदलें</span>
+                  <span>{theme === 'noon' ? '☀️ दोपहर मोड (Light)' : '🌙 सांझ मोड (Dark)'}</span>
+                  <span className="text-xs text-[#2e7d32] font-bold">बदलें</span>
                 </button>
-                <span className="text-xs text-gray-500 mt-1 block">
-                  खेत में धूप के लिए दोपहर मोड उपयुक्त है
-                </span>
               </div>
             </div>
           </div>
 
           {/* Section 2: Farm Location & Vehicle */}
-          <div className="rounded-2xl bg-white border border-gray-200 p-6 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b pb-3">
-              <MapPin className="h-5 w-5 text-[#2e7d32]" />
-              <h3 className="font-extrabold text-base text-[#14231b]">किसान का गृह स्थान व परिवहन वरीयता</h3>
+          <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-2.5">
+              <MapPin className="h-4 w-4 text-[#2e7d32]" />
+              <h3 className="font-bold text-sm text-[var(--text-main)]">किसान का गृह स्थान व वाहन</h3>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+            <div className="grid sm:grid-cols-2 gap-4 text-xs sm:text-sm">
               <div>
-                <label className="block font-semibold text-gray-700 mb-1.5">
-                  किसान का गृह जिला व ब्लॉक:
+                <label className="block font-semibold mb-1 text-[var(--text-main)]">
+                  गृह जिला व ब्लॉक:
                 </label>
                 <input
                   type="text"
                   value={farmerDistrict}
                   onChange={(e) => setFarmerDistrict(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 p-2.5 font-medium focus:border-[#2e7d32] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 font-medium text-[var(--text-main)] focus:border-[#2e7d32] focus:outline-none"
                 />
-                <span className="text-xs text-gray-500 mt-1 block">
-                  दूरी की गणना इसी स्थान से होगी
-                </span>
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-1.5">
+                <label className="block font-semibold mb-1 text-[var(--text-main)]">
                   पसंदीदा ढुलाई वाहन:
                 </label>
                 <select
                   value={defaultVehicle}
                   onChange={(e) => setDefaultVehicle(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 p-2.5 font-bold focus:border-[#2e7d32] focus:outline-none"
+                  className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 font-medium text-[var(--text-main)] focus:border-[#2e7d32] focus:outline-none"
                 >
                   {TRANSPORT_MODES.map(v => (
                     <option key={v.id} value={v.id}>{v.icon} {v.name}</option>
                   ))}
                 </select>
-                <span className="text-xs text-gray-500 mt-1 block">
-                  मंडी तुलना में यह डिफ़ॉल्ट रूप से चुना जाएगा
-                </span>
               </div>
             </div>
           </div>
 
-          {/* Section 3: Low Connectivity & SMS IVR Alerts */}
-          <div className="rounded-2xl bg-white border border-gray-200 p-6 shadow-md space-y-4">
-            <div className="flex items-center gap-2 border-b pb-3">
-              <WifiOff className="h-5 w-5 text-[#e09f3e]" />
-              <h3 className="font-extrabold text-base text-[#14231b]">कमज़ोर नेटवर्क (2G/3G) व SMS अलर्ट्स</h3>
+          {/* Section 3: Low Connectivity */}
+          <div className="rounded-2xl bg-[var(--bg-card)] border border-[var(--border-color)] p-5 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 border-b border-[var(--border-color)] pb-2.5">
+              <WifiOff className="h-4 w-4 text-[#2e7d32]" />
+              <h3 className="font-bold text-sm text-[var(--text-main)]">कमज़ोर नेटवर्क (2G/3G) व SMS अलर्ट्स</h3>
             </div>
 
-            <div className="space-y-4 text-sm">
-              <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border">
+            <div className="space-y-3 text-xs sm:text-sm">
+              <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--bg-card-subtle)] border border-[var(--border-color)]">
                 <div>
-                  <span className="font-bold text-gray-900 block">ऑफ़लाइन डेटा स्टोरेज (Offline SQLite/Cache)</span>
-                  <span className="text-xs text-gray-500">
-                    इंटरनेट न होने पर भी पिछला मंडी भाव और गणना सुरक्षित रहती है।
+                  <span className="font-bold text-[var(--text-main)] block">ऑफ़लाइन डेटा स्टोरेज</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    इंटरनेट न होने पर भी पिछला भाव सुरक्षित रहता है।
                   </span>
                 </div>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  सक्रिय (Active)
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-2 py-0.5 rounded flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" />
+                  सक्रिय
                 </span>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1.5">
-                    किसान का मोबाइल नंबर (SMS/WhatsApp हेतु):
+                  <label className="block font-semibold mb-1 text-[var(--text-main)]">
+                    किसान का मोबाइल नंबर:
                   </label>
                   <input
                     type="tel"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full rounded-xl border border-gray-300 p-2.5 font-mono focus:border-[#2e7d32] focus:outline-none"
+                    className="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)] p-2 font-mono text-[var(--text-main)] focus:border-[#2e7d32] focus:outline-none"
                   />
                 </div>
 
-                <div className="flex items-center pt-6">
-                  <label className="flex items-center gap-2 cursor-pointer">
+                <div className="flex items-center pt-5">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs">
                     <input
                       type="checkbox"
                       checked={smsAlertsEnabled}
                       onChange={(e) => setSmsAlertsEnabled(e.target.checked)}
                       className="h-4 w-4 accent-[#2e7d32] rounded"
                     />
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-medium text-[var(--text-main)]">
                       भाव शिखर होने पर निःशुल्क SMS अलर्ट भेजें
                     </span>
                   </label>
@@ -196,17 +174,17 @@ export default function SettingsPage({
           </div>
 
           {/* Save Button */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex items-center justify-between pt-1">
             {savedSuccess ? (
-              <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 animate-fadeIn">
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950 px-3 py-1.5 rounded-lg flex items-center gap-1 animate-fadeIn">
                 <CheckCircle2 className="h-4 w-4" />
-                सेटिंग्स सफलतापूर्वक सुरक्षित हो गईं!
+                सेटिंग्स सुरक्षित हो गईं!
               </span>
             ) : <span></span>}
 
             <button
               type="submit"
-              className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[#2e7d32] hover:bg-[#388e3c] text-white font-bold text-sm shadow-md transition-colors"
+              className="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#2e7d32] hover:bg-[#256629] text-white font-bold text-xs sm:text-sm shadow-sm transition-colors"
             >
               <Save className="h-4 w-4" />
               <span>सेटिंग्स सुरक्षित करें</span>
@@ -215,15 +193,12 @@ export default function SettingsPage({
 
         </form>
 
-        {/* Hackathon Credits */}
-        <div className="p-6 rounded-2xl bg-[#14231b] text-white space-y-2 border border-[#2d6a4f]/40 text-xs">
-          <div className="font-extrabold text-[#e09f3e] text-sm">
-            कृषिवाणी (KrishiVaani / KrishiPrice) · हिंदी हैकाथॉन 2026
+        <div className="p-4 rounded-xl bg-[var(--bg-card-subtle)] border border-[var(--border-color)] text-xs text-[var(--text-muted)] space-y-1">
+          <div className="font-bold text-[var(--text-main)]">
+            कृषिवाणी · हिंदी हैकाथॉन 2026
           </div>
-          <p className="text-gray-300 leading-relaxed">
-            परियोजना टीम: HD Falcons (दिव्यांश वर्मा · हर्षित गुप्ता) <br />
-            संस्थान: अटल बिहारी वाजपेयी - भारतीय सूचना प्रौद्योगिकी एवं प्रबंधन संस्थान (IIITM), ग्वालियर <br />
-            डेटा स्रोत: Agmarknet (कृषि मंत्रालय) व e-NAM · भाषा AI: राष्ट्रीय भाषा अनुवाद मिशन भाषिणी (MeitY)
+          <p>
+            टीम: HD Falcons (दिव्यांश वर्मा · हर्षित गुप्ता) · IIITM ग्वालियर
           </p>
         </div>
 
